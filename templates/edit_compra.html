@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="mt-4">
+    <h2>Editar Compra</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="id_producto">Producto</label>
+            <select class="form-control" id="id_producto" name="id_producto" required>
+                {% for producto in productos %}
+                <option value="{{ producto[0] }}" {% if producto[0] == compra[1] %} selected {% endif %}>{{ producto[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_proveedor">Proveedor</label>
+            <select class="form-control" id="id_proveedor" name="id_proveedor" required>
+                {% for proveedor in proveedores %}
+                <option value="{{ proveedor[0] }}" {% if proveedor[0] == compra[2] %} selected {% endif %}>{{ proveedor[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" value="{{ compra[3] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="date" class="form-control" id="fecha" name="fecha" value="{{ compra[4] }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Editar Compra</button>
+    </form>
+</div>
+{% endblock %}
+
