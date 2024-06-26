@@ -5,199 +5,201 @@ app = Flask(__name__)
 app.secret_key = '123456'
 
 # Configuración de MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_DB'] = 'inventario'
+app.config['MYSQL_HOST'] = 'bqevucf5pnlsxxqovja3-mysql.services.clever-cloud.com'
+app.config['MYSQL_USER'] = 'uktdesa4npr5ivsx'
+app.config['MYSQL_PASSWORD'] = 'id1nrmXpthU2tCgLzoST'
+app.config['MYSQL_DB'] = 'bqevucf5pnlsxxqovja3'
 
 mysql = MySQL(app)
 
 @app.route('/')
-def index_compras():
+def index_proyectos():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT c.id, p.nombre as producto_nombre, pr.nombre as proveedor_nombre, c.cantidad, c.fecha "
-                "FROM compras c "
-                "JOIN productos p ON c.id_producto = p.id "
-                "JOIN proveedores pr ON c.id_proveedor = pr.id")
-    compras = cur.fetchall()
-
-    cur.execute("SELECT id, nombre FROM productos")
-    productos = cur.fetchall()
-
-    cur.execute("SELECT id, nombre FROM proveedores")
-    proveedores = cur.fetchall()
-
-    cur.close()
-    return render_template('index_compras.html', compras=compras, productos=productos, proveedores=proveedores)
-
-# Ruta para la página principal de productos
-@app.route('/productos')
-def index_productos():
-    cur = mysql.connection.cursor()
-    result_value = cur.execute("SELECT * FROM productos")
+    result_value = cur.execute("SELECT * FROM Proyectos")
     if result_value > 0:
-        productos = cur.fetchall()
-        return render_template('index_productos.html', productos=productos)
-    return render_template('index_productos.html')
+        proyectos = cur.fetchall()
+        return render_template('index_proyectos.html', proyectos=proyectos)
+    return render_template('index_proyectos.html')
 
-# Ruta para la página principal de proveedores
-@app.route('/proveedores')
-def index_proveedores():
+
+@app.route('/asignaciones')
+def index_asignaciones():
     cur = mysql.connection.cursor()
-    result_value = cur.execute("SELECT * FROM proveedores")
+    cur.execute("SELECT a.id, p.nombre as proyecto_nombre, e.nombre as empleado_nombre, a.fecha_asignacion "
+                "FROM Asignaciones a "
+                "JOIN Proyectos p ON a.proyecto_id = p.id "
+                "JOIN Empleados e ON a.empleado_id = e.id")
+    asignaciones = cur.fetchall()
+
+    cur.execute("SELECT id, nombre FROM Proyectos")
+    proyectos = cur.fetchall()
+
+    cur.execute("SELECT id, nombre FROM Empleados")
+    empleados = cur.fetchall()
+
+    cur.close()
+    return render_template('index_asignaciones.html', asignaciones=asignaciones, proyectos=proyectos, empleados=empleados)
+
+@app.route('/empleados')
+def index_empleados():
+    cur = mysql.connection.cursor()
+    result_value = cur.execute("SELECT * FROM Empleados")
     if result_value > 0:
-        proveedores = cur.fetchall()
-        return render_template('index_proveedores.html', proveedores=proveedores)
-    return render_template('index_proveedores.html')
+        empleados = cur.fetchall()
+        return render_template('index_empleados.html', empleados=empleados)
+    return render_template('index_empleados.html')
 
-# Ruta para agregar un producto
-@app.route('/add_producto', methods=['GET', 'POST'])
-def add_producto():
+@app.route('/add_proyecto', methods=['GET', 'POST'])
+def add_proyecto():
     if request.method == 'POST':
-        product_details = request.form
-        nombre = product_details['nombre']
-        descripcion = product_details['descripcion']
-        precio = product_details['precio']
-        stock = product_details['stock']
+        project_details = request.form
+        nombre = project_details['nombre']
+        descripcion = project_details['descripcion']
+        fecha_inicio = project_details['fecha_inicio']
+        fecha_fin = project_details['fecha_fin']
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO productos (nombre, descripcion, precio, stock) VALUES (%s, %s, %s, %s)", (nombre, descripcion, precio, stock))
+        cur.execute("INSERT INTO Proyectos (nombre, descripcion, fecha_inicio, fecha_fin) VALUES (%s, %s, %s, %s)", (nombre, descripcion, fecha_inicio, fecha_fin))
         mysql.connection.commit()
         cur.close()
-        flash('Producto agregado satisfactoriamente')
-        return redirect(url_for('index_productos'))
-    return render_template('add_producto.html')
+        flash('Proyecto agregado satisfactoriamente')
+        return redirect(url_for('index_proyectos'))
+    return render_template('add_proyecto.html')
 
-@app.route('/add_proveedor', methods=['GET', 'POST'])
-def add_proveedor():
+@app.route('/add_empleado', methods=['GET', 'POST'])
+def add_empleado():
     if request.method == 'POST':
-        provider_details = request.form
-        nombre = provider_details['nombre']
-        contacto = provider_details['contacto']
-        telefono = provider_details['telefono']
+        employee_details = request.form
+        nombre = employee_details['nombre']
+        email = employee_details['email']
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO proveedores (nombre, contacto, telefono) VALUES (%s, %s, %s)", (nombre, contacto, telefono))
+        cur.execute("INSERT INTO Empleados (nombre, email) VALUES (%s, %s)", (nombre, email))
         mysql.connection.commit()
         cur.close()
-        flash('Proveedor agregado satisfactoriamente')
-        return redirect(url_for('index_proveedores'))
-    return render_template('add_proveedor.html')
+        flash('Empleado agregado satisfactoriamente')
+        return redirect(url_for('index_empleados'))
+    return render_template('add_empleado.html')
 
-
-# Ruta para editar un producto
-@app.route('/edit_producto/<int:id>', methods=['GET', 'POST'])
-def edit_producto(id):
+@app.route('/edit_proyecto/<int:id>', methods=['GET', 'POST'])
+def edit_proyecto(id):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM productos WHERE id = %s", [id])
-    producto = cur.fetchone()
+    cur.execute("SELECT * FROM Proyectos WHERE id = %s", [id])
+    proyecto = cur.fetchone()
     if request.method == 'POST':
-        product_details = request.form
-        nombre = product_details['nombre']
-        descripcion = product_details['descripcion']
-        precio = product_details['precio']
-        stock = product_details['stock']
+        project_details = request.form
+        nombre = project_details['nombre']
+        descripcion = project_details['descripcion']
+        fecha_inicio = project_details['fecha_inicio']
+        fecha_fin = project_details['fecha_fin']
 
-        cur.execute("UPDATE productos SET nombre = %s, descripcion = %s, precio = %s, stock = %s WHERE id = %s", (nombre, descripcion, precio, stock, id))
+        cur.execute("UPDATE Proyectos SET nombre = %s, descripcion = %s, fecha_inicio = %s, fecha_fin = %s WHERE id = %s", (nombre, descripcion, fecha_inicio, fecha_fin, id))
         mysql.connection.commit()
         cur.close()
-        flash('Producto actualizado satisfactoriamente')
-        return redirect(url_for('index_productos'))
-    return render_template('edit_producto.html', producto=producto)
+        flash('Proyecto actualizado satisfactoriamente')
+        return redirect(url_for('index_proyectos'))
+    return render_template('edit_proyecto.html', proyecto=proyecto)
 
-# Ruta para editar un proveedor
-@app.route('/edit_proveedor/<int:id>', methods=['GET', 'POST'])
-def edit_proveedor(id):
+@app.route('/edit_empleado/<int:id>', methods=['GET', 'POST'])
+def edit_empleado(id):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM proveedores WHERE id = %s", [id])
-    proveedor = cur.fetchone()
+    cur.execute("SELECT * FROM Empleados WHERE id = %s", [id])
+    empleado = cur.fetchone()
     if request.method == 'POST':
-        provider_details = request.form
-        nombre = provider_details['nombre']
-        contacto = provider_details['contacto']
-        telefono = provider_details['telefono']
+        employee_details = request.form
+        nombre = employee_details['nombre']
+        email = employee_details['email']
 
-        cur.execute("UPDATE proveedores SET nombre = %s, contacto = %s, telefono = %s WHERE id = %s", (nombre, contacto, telefono, id))
+        cur.execute("UPDATE Empleados SET nombre = %s, email = %s WHERE id = %s", (nombre, email, id))
         mysql.connection.commit()
         cur.close()
-        flash('Proveedor actualizado satisfactoriamente')
-        return redirect(url_for('index_proveedores'))
-    return render_template('edit_proveedor.html', proveedor=proveedor)
+        flash('Empleado actualizado satisfactoriamente')
+        return redirect(url_for('index_empleados'))
+    return render_template('edit_empleado.html', empleado=empleado)
 
-# Ruta para eliminar un producto
-@app.route('/delete_producto/<int:id>', methods=['POST'])
-def delete_producto(id):
+@app.route('/delete_proyecto/<int:id>', methods=['POST'])
+def delete_proyecto(id):
     cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM productos WHERE id = %s", [id])
+    
+    # Eliminar las asignaciones relacionadas
+    cur.execute("DELETE FROM Asignaciones WHERE proyecto_id = %s", [id])
+    mysql.connection.commit()
+
+    # Eliminar el proyecto
+    cur.execute("DELETE FROM Proyectos WHERE id = %s", [id])
+    mysql.connection.commit()
+    
+    cur.close()
+    flash('Proyecto eliminado satisfactoriamente')
+    return redirect(url_for('index_proyectos'))
+
+@app.route('/delete_empleado/<int:id>', methods=['POST'])
+def delete_empleado(id):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM Empleados WHERE id = %s", [id])
     mysql.connection.commit()
     cur.close()
-    flash('Producto eliminado satisfactoriamente')
-    return redirect(url_for('index_productos'))
+    flash('Empleado eliminado satisfactoriamente')
+    return redirect(url_for('index_empleados'))
 
-# Ruta para eliminar un proveedor
-@app.route('/delete_proveedor/<int:id>', methods=['POST'])
-def delete_proveedor(id):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM proveedores WHERE id = %s", [id])
-    mysql.connection.commit()
-    cur.close()
-    flash('Proveedor eliminado satisfactoriamente')
-    return redirect(url_for('index_proveedores'))
-
-
-# Ruta para agregar una compra
-@app.route('/add_compra', methods=['GET', 'POST'])
-def add_compra():
+@app.route('/add_asignacion', methods=['GET', 'POST'])
+def add_asignacion():
     if request.method == 'POST':
-        compra_details = request.form
-        id_producto = compra_details['id_producto']
-        id_proveedor = compra_details['id_proveedor']
-        cantidad = compra_details['cantidad']
-        fecha = compra_details['fecha']
+        asignacion_details = request.form
+        proyecto_id = asignacion_details['proyecto_id']
+        empleado_id = asignacion_details['empleado_id']
+        fecha_asignacion = asignacion_details['fecha_asignacion']
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO compras (id_producto, id_proveedor, cantidad, fecha) VALUES (%s, %s, %s, %s)", (id_producto, id_proveedor, cantidad, fecha))
+        cur.execute("INSERT INTO Asignaciones (proyecto_id, empleado_id, fecha_asignacion) VALUES (%s, %s, %s)", (proyecto_id, empleado_id, fecha_asignacion))
         mysql.connection.commit()
         cur.close()
-        flash('Compra agregada satisfactoriamente')
-        return redirect(url_for('index_compras'))
-    return render_template('add_compra.html')
-
-# Ruta para editar una compra
-@app.route('/edit_compra/<int:id>', methods=['GET', 'POST'])
-def edit_compra(id):
+        flash('Asignación agregada satisfactoriamente')
+        return redirect(url_for('index_asignaciones'))
+    
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM compras WHERE id = %s", [id])
-    compra = cur.fetchone()
+    cur.execute("SELECT id, nombre FROM Proyectos")
+    proyectos = cur.fetchall()
+    
+    cur.execute("SELECT id, nombre FROM Empleados")
+    empleados = cur.fetchall()
+    
+    cur.close()
+    return render_template('add_asignacion.html', proyectos=proyectos, empleados=empleados)
 
-    cur.execute("SELECT id, nombre FROM productos")
-    productos = cur.fetchall()
+@app.route('/edit_asignacion/<int:id>', methods=['GET', 'POST'])
+def edit_asignacion(id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Asignaciones WHERE id = %s", [id])
+    asignacion = cur.fetchone()
 
-    cur.execute("SELECT id, nombre FROM proveedores")
-    proveedores = cur.fetchall()
+    cur.execute("SELECT id, nombre FROM Proyectos")
+    proyectos = cur.fetchall()
+
+    cur.execute("SELECT id, nombre FROM Empleados")
+    empleados = cur.fetchall()
 
     if request.method == 'POST':
-        compra_details = request.form
-        id_producto = compra_details['id_producto']
-        id_proveedor = compra_details['id_proveedor']
-        cantidad = compra_details['cantidad']
-        fecha = compra_details['fecha']
+        asignacion_details = request.form
+        proyecto_id = asignacion_details['proyecto_id']
+        empleado_id = asignacion_details['empleado_id']
+        fecha_asignacion = asignacion_details['fecha_asignacion']
 
-        cur.execute("UPDATE compras SET id_producto = %s, id_proveedor = %s, cantidad = %s, fecha = %s WHERE id = %s", (id_producto, id_proveedor, cantidad, fecha, id))
+        cur.execute("UPDATE Asignaciones SET proyecto_id = %s, empleado_id = %s, fecha_asignacion = %s WHERE id = %s", (proyecto_id, empleado_id, fecha_asignacion, id))
         mysql.connection.commit()
         cur.close()
-        flash('Compra actualizada satisfactoriamente')
-        return redirect(url_for('index_compras'))
-    return render_template('edit_compra.html', compra=compra, productos=productos, proveedores=proveedores)
+        flash('Asignación actualizada satisfactoriamente')
+        return redirect(url_for('index_asignaciones'))
+    return render_template('edit_asignacion.html', asignacion=asignacion, proyectos=proyectos, empleados=empleados)
 
-# Ruta para eliminar una compra
-@app.route('/delete_compra/<int:id>', methods=['POST'])
-def delete_compra(id):
+@app.route('/delete_asignacion/<int:id>', methods=['POST'])
+def delete_asignacion(id):
     cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM compras WHERE id = %s", [id])
+    cur.execute("DELETE FROM Asignaciones WHERE id = %s", [id])
     mysql.connection.commit()
     cur.close()
-    flash('Compra eliminada satisfactoriamente')
-    return redirect(url_for('index_compras'))
+    flash('Asignación eliminada satisfactoriamente')
+    return redirect(url_for('index_asignaciones'))
 
 if __name__ == '__main__':
     app.run(debug=True)

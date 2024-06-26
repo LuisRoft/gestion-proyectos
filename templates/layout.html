@@ -1,28 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management</title>
+    <title>Gestión de Proyectos</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('index_compras') }}">Inventory Management</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light d-flex align-items-center">
+        <p class="navbar-brand">Gestión de Proyectos - PUCEM</p>
+        <div class="collapse navbar-collapse d-flex align-items-center" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('index_compras') }}">Inicio <span class="sr-only">(current)</span></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index_proyectos') }}">Proyectos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('index_productos') }}">Productos</a>
+                    <a class="nav-link" href="{{ url_for('index_empleados') }}">Empleados</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('index_proveedores') }}">Proveedores</a>
+                    <a class="nav-link" href="{{ url_for('index_asignaciones') }}">Asignaciones</a>
                 </li>
                 <!-- Puedes agregar más enlaces aquí -->
             </ul>

@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="mt-4">
+    <h2>Agregar Asignación</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="proyecto_id">Proyecto</label>
+            <select class="form-control" id="proyecto_id" name="proyecto_id" required>
+                {% for proyecto in proyectos %}
+                <option value="{{ proyecto[0] }}">{{ proyecto[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="empleado_id">Empleado</label>
+            <select class="form-control" id="empleado_id" name="empleado_id" required>
+                {% for empleado in empleados %}
+                <option value="{{ empleado[0] }}">{{ empleado[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fecha_asignacion">Fecha de Asignación</label>
+            <input type="date" class="form-control" id="fecha_asignacion" name="fecha_asignacion" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Agregar Asignación</button>
+    </form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="mt-4">
+    <h2>Editar Empleado</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ empleado[1] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ empleado[2] }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Actualizar Empleado</button>
+    </form>
+</div>
+{% endblock %}
+
+
